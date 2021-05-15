@@ -103,12 +103,17 @@ bool one_of(InputIt first, InputIt last, UnaryPredicate p)
 	return true;
 }
 
-template<class InputIt, class Comp>
-bool is_sorted(InputIt first, InputIt last, Comp cmp)
+template<class InputIt, class Comp = greater<typename std::iterator_traits<InputIt>::value_type>>
+bool is_sorted(InputIt first, InputIt last, Comp cmp = {})
 {
-	for (; first != last - 1; first++)
+	if (first == last)
 	{
-		if (!cmp(*first, *(first + 1)))
+		return true;
+	}
+	last--;
+	for (; first != last; first++)
+	{
+		if (!cmp(*first, *std::next(first))
 			return false;
 	}
 	return true;
@@ -156,13 +161,13 @@ InputIt find_backward(InputIt first, InputIt last, const T& value)
 template<class InputIt, class Predicate>
 bool is_palindrome(InputIt first, InputIt last, Predicate p)
 {
-	last--;
-	while (first <= last)
+	InputIt end = last;
+	for (; first != end; first++)
 	{
+		last--;
 		if (*first == *last && p(*first))
 		{
-			first++;
-			last--;
+			continue;
 		}
 		else
 		{
