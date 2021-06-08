@@ -161,11 +161,11 @@ public:
 		std::cout << '\n';
 	}
 
-	iterator begin() const { return iterator(*this, first_pos()); }
-	iterator end() const { return iterator(*this, next_pos(head)); }
+	iterator begin() const { return iterator(this, first_pos()); }
+	iterator end() const { return iterator(this, next_pos(head)); }
 
-	const_iterator cbegin() const { return const_iterator(*this, first_pos()); }
-	const_iterator cend() const { return const_iterator(*this, next_pos(head)); }
+	const_iterator cbegin() const { return const_iterator(this, first_pos()); }
+	const_iterator cend() const { return const_iterator(this, next_pos(head)); }
 
 	friend class Iterator<ValueType>;
 };
@@ -181,10 +181,10 @@ class Iterator
 	using pointer = ValueType*;
 
 private:
-	RingBuffer<ValueType>& buffer;
+	RingBuffer<ValueType>* buffer;
 	int pos;
 public:
-	Iterator(RingBuffer<ValueType>& buf, const int& pos) : buffer(buf), pos(pos) {}
+	Iterator(const RingBuffer<ValueType>* buf, const int& pos) : buffer(buf), pos(pos) {}
 
 	Iterator& operator=(const Iterator& other)
 	{
@@ -195,7 +195,7 @@ public:
 
 	reference operator*()
 	{
-		return buffer.data[pos];
+		return buffer->data[pos];
 	}
 
 	pointer operator->()
@@ -205,56 +205,56 @@ public:
 
 	Iterator& operator++()
 	{
-		pos = (pos + 1) % buffer.size_of_array;
+		pos = (pos + 1) % buffer->size_of_array;
 		return *this;
 	}
 
 	Iterator operator++(int)
 	{
 		Iterator tmp = *this;
-		pos = (pos + 1) % buffer.size_of_array;
+		pos = (pos + 1) % buffer->size_of_array;
 		return tmp;
 	}
 
 	Iterator& operator--()
 	{
-		pos = pos == 0 ? buffer.size_of_array - 1 : pos - 1;
+		pos = pos == 0 ? buffer->size_of_array - 1 : pos - 1;
 		return *this;
 	}
 
 	Iterator operator--(int)
 	{
 		Iterator tmp = *this;
-		pos = pos == 0 ? buffer.size_of_array - 1 : pos - 1;
+		pos = pos == 0 ? buffer->size_of_array - 1 : pos - 1;
 		return tmp;
 	}
 
 	Iterator operator+(const int& num)
 	{
 		Iterator tmp = *this;
-		tmp.pos = (pos + num) % buffer.size_of_array;
+		tmp.pos = (pos + num) % buffer->size_of_array;
 		return tmp;
 	}
 
 	reference operator[](const int& index)
 	{
-		return buffer.data[(*this + index).pos];
+		return buffer->data[(*this + index).pos];
 	}
 
 	friend Iterator<ValueType> operator+(const int& num, const Iterator<ValueType>& it);
 
 
-	difference_type operator-(const Iterator& other) const 
+	difference_type operator-(const Iterator& other) const
 	{
 		int a = pos;
 		int b = other.pos;
 
-		if (buffer.first_pos() > buffer.head)
+		if (buffer->first_pos() > buffer->head)
 		{
-			if (a < buffer.first_pos())
-				a += buffer.size_of_array;
-			if (b < buffer.first_pos())
-				b += buffer.size_of_array;
+			if (a < buffer->first_pos())
+				a += buffer->size_of_array;
+			if (b < buffer->first_pos())
+				b += buffer->size_of_array;
 			return a - b;
 		}
 		return a - b;
@@ -269,7 +269,7 @@ public:
 
 	Iterator& operator+=(const int& num)
 	{
-		pos = (pos + num) % buffer.size_of_array;
+		pos = (pos + num) % buffer->size_of_array;
 		return *this;
 	}
 
@@ -277,7 +277,7 @@ public:
 	{
 		if (pos - num < 0)
 		{
-			pos = buffer.size_of_array + pos - num;
+			pos = buffer->size_of_array + pos - num;
 			return *this;
 		}
 		pos -= num;
@@ -286,22 +286,22 @@ public:
 
 	bool operator<(const Iterator& other)
 	{
-		return (*this - buffer.begin()) < (other - buffer.begin());
+		return (*this - buffer->begin()) < (other - buffer->begin());
 	}
 
 	bool operator>(const Iterator& other)
 	{
-		return (*this - buffer.begin()) > (other - buffer.begin());
+		return (*this - buffer->begin()) > (other - buffer->begin());
 	}
 
 	bool operator<=(const Iterator& other)
 	{
-		return (*this - buffer.begin()) <= (other - buffer.begin());
+		return (*this - buffer->begin()) <= (other - buffer->begin());
 	}
 
 	bool operator>=(const Iterator& other)
 	{
-		return (*this - buffer.begin()) >= (other - buffer.begin());
+		return (*this - buffer->begin()) >= (other - buffer->begin());
 	}
 
 	bool operator==(const Iterator& other)
@@ -345,5 +345,5 @@ int main()
 	std::cout << "max_element = " << *(std::max_element(a.begin(), a.end())) << '\n';
 	std::cout << "min_elememt = " << *(std::min_element(a.begin(), a.end())) << '\n';
 	std::sort(a.begin(), a.end());
-	return 0; 
+	return 0;
 }
